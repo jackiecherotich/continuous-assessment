@@ -1,0 +1,34 @@
+
+
+# Terraform files
+
+*.tfstate
+*.tfstate.backup
+.terraform/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# === SSH Keys ===
+*.pem
+*.pub
+*.key
+ssh-keys
+# === Ansible ===
+*.retry
+*.log
+
+# === Credentials / Env ===
+.env
+*.vault_pass
+*.secret
+
+# === System / Editor Files ===
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
