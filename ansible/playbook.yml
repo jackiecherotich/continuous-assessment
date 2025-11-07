@@ -84,3 +84,74 @@
        name: ubuntu
        groups: docker
        append: yes     
+
+
+
+    # Part 3: Docker Container Deployment
+    - name: Create application folder on the Ec2 Instance
+      file:
+        path: /home/ubuntu/web-app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+   
+    - name: Copy the sample index.html files to the instance
+      copy:
+        src: ../web-app/index.html
+        dest: /home/ubuntu/web-app
+        owner: ubuntu
+        group: ubuntu
+        
+
+
+    - name: Copy the Docker file
+      copy:
+        src: ../web-app/Dockerfile
+        dest: /home/ubuntu/web-app/
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+ 
+    - name: Copy docker-compose.yml
+      copy:
+        src: ../web-app/docker-compose.yml
+        dest: /home/ubuntu/web-app/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+
+   
+
+    - name: stop existing containers if any
+      shell: docker compose down
+      args:
+         chdir: /home/ubuntu/web-app/
+      become_user: ubuntu
+
+
+    - name: Build and start container
+      shell: docker compose up -d --build
+      args:
+        chdir: /home/ubuntu/web-app/
+      become_user: ubuntu 
+      become: true   
+
+    - name: Checking any  running containers
+      shell: docker ps
+      args:
+         chdir: /home/ubuntu/web-app/
+      register: docker_ps
+
+    - name: Display running containers
+      debug:
+        msg: "{{ docker_ps.stdout_lines}}"
+
+    - name: Wait for Nginx to respond
+      wait_for:
+        host: 127.0.0.1
+        port: 8080
+        delay: 5
+        timeout: 60
+        state: started
+   
