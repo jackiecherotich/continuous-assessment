@@ -6,18 +6,20 @@ jobs:
       - image: cimg/base:stable  # Executor
     steps:
       - checkout
+
+      # Add SSH keys stored in CircleCI project
       - add_ssh_keys:
           fingerprints:
             - SHA256:7pNFQEQEcmBCtf7scKhJJt3L9ELoL4VrXyOziI3GqK0
+
       # Step 1: Extract EC2 IP from inventory.ini
       - run:
           name: Extract EC2 IP
           command: |
             EC2_IP=$(awk '/^[0-9]/{print $1; exit}' ansible/inventory.ini)
             echo "$EC2_IP" > ec2_ip.txt
-  
 
-      # Step 2: Deploy static app safely
+      # Step 2: Deploy Web App Container
       - run:
           name: Deploy Web App Container
           command: |
@@ -27,43 +29,48 @@ jobs:
             # Ensure app folder exists
             ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/web-app"
 
-            # Copy app files
+            # Copy web-app folder from CircleCI to EC2
             scp -r web-app/* ubuntu@$EC2_IP:~/web-app/
 
-            # Stop and remove old container if exists
-            ssh ubuntu@$EC2_IP "docker rm -f web-app-static-site || true"
+            # Stop and remove existing container if running
+            ssh ubuntu@$EC2_IP "
+              if [ \$(docker ps -q -f name=web-app-static-site) ]; then
+                echo 'Stopping existing container...'
+                docker rm -f web-app-static-site
+              fi
+            "
 
             # Backup existing image if any
-            ssh ubuntu@$EC2_IP "docker images | grep web-app-static-site_backup || docker tag web-app-static-site:latest web-app-static-site_backup || true"
+            ssh ubuntu@$EC2_IP "
+              docker images | grep web-app-static-site_backup || \
+              docker tag web-app-static-site:latest web-app-static-site_backup || true
+            "
 
-            # Attempt to build new image
-            ssh ubuntu@$EC2_IP "cd ~/web-app && docker build -t web-app-static-site:latest . || echo BUILD_FAILED > /tmp/build_status"
+            # Build new Docker image
+            ssh ubuntu@$EC2_IP "
+              cd ~/web-app
+              docker build -t web-app-static-site:latest . || echo BUILD_FAILED > /tmp/build_status
+            "
 
             # Rollback if build failed
             ssh ubuntu@$EC2_IP "
               if [ -f /tmp/build_status ]; then
-                echo 'clBuild failed — rolling back...'
+                echo 'Build failed — rolling back...'
                 docker run -d -p 8080:80 --name web-app-static-site_rollback web-app-static-site_backup
                 rm /tmp/build_status
                 exit 1
               fi
             "
-            # Stop and remove the old container if it exists
-            ssh ubuntu@$EC2_IP "
-             if [ \$(docker ps -q -f name=web-app-static-site) ]; then
-              echo 'Stopping existing container...'# Stop and remove the old container if it exists
-            ssh ubuntu@$EC2_IP "
-             if [ \$(docker ps -q -f name=web-app-static-site) ]; then
-              echo 'Stopping existing container...'
-              docker rm -f web-app-static-site
-            fi"
-
 
             # Run new container
-            ssh ubuntu@$EC2_IP "docker run -d -p 8080:80 --name web-app-static-site web-app-static-site:latest"
+            ssh ubuntu@$EC2_IP "
+              docker run -d -p 8080:80 --name web-app-static-site web-app-static-site:latest
+            "
 
             # Update backup tag
-            ssh ubuntu@$EC2_IP "docker tag web-app-static-site:latest web-app-static-site_backup"
+            ssh ubuntu@$EC2_IP "
+              docker tag web-app-static-site:latest web-app-static-site_backup
+            "
 
 workflows:
   deploy_on_push:
