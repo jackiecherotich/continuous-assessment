@@ -56,7 +56,7 @@ jobs:
              if [ \$(docker ps -q -f name=web-app-static-site) ]; then
               echo 'Stopping existing container...'
               docker rm -f web-app-static-site
-  
+            fi"
 
 
             # Run new container
