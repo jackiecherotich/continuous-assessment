@@ -64,7 +64,7 @@ jobs:
 
             # Run new container
             ssh ubuntu@$EC2_IP "
-              docker run -d -p 8080:80 --name web-app-static-site web-app-static-site:latest
+              docker run -d -p 443:80 --name web-app-static-site web-app-static-site:latest
             "
 
             # Update backup tag
