@@ -40,7 +40,7 @@ jobs:
             # Rollback if build failed
             ssh ubuntu@$EC2_IP "
               if [ -f /tmp/build_status ]; then
-                echo 'Build failed — rolling back...'
+                echo 'clBuild failed — rolling back...'
                 docker run -d -p 8080:80 --name web-app-static-site_rollback web-app-static-site_backup
                 rm /tmp/build_status
                 exit 1
@@ -52,3 +52,12 @@ jobs:
 
             # Update backup tag
             ssh ubuntu@$EC2_IP "docker tag web-app-static-site:latest web-app-static-site_backup"
+
+workflows:
+  deploy_on_push:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - main
