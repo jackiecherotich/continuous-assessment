@@ -43,7 +43,7 @@ jobs:
             ssh ubuntu@$EC2_IP "
               if [ -f /tmp/build_status ]; then
                 echo 'clBuild failed — rolling back...'
-                docker run -d -p 8080:80 --name web-app-static-site_rollback web-app-static-site_backup
+                docker run -d -p 8081:80 --name web-app-static-site_rollback web-app-static-site_backup
                 rm /tmp/build_status
                 exit 1
               fi
