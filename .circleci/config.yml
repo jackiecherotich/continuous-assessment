@@ -6,7 +6,9 @@ jobs:
       - image: cimg/base:stable  # Executor
     steps:
       - checkout
-
+      - add_ssh_keys:
+          fingerprints:
+            - SHA256:7pNFQEQEcmBCtf7scKhJJt3L9ELoL4VrXyOziI3GqK0
       # Step 1: Extract EC2 IP from inventory.ini
       - run:
           name: Extract EC2 IP
