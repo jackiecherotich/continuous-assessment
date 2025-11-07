@@ -48,9 +48,19 @@ jobs:
                 exit 1
               fi
             "
+            # Stop and remove the old container if it exists
+            ssh ubuntu@$EC2_IP "
+             if [ \$(docker ps -q -f name=web-app-static-site) ]; then
+              echo 'Stopping existing container...'# Stop and remove the old container if it exists
+            ssh ubuntu@$EC2_IP "
+             if [ \$(docker ps -q -f name=web-app-static-site) ]; then
+              echo 'Stopping existing container...'
+              docker rm -f web-app-static-site
+  
+
 
             # Run new container
-            ssh ubuntu@$EC2_IP "docker run -d -p 80:80 --name web-app-static-site web-app-static-site:latest"
+            ssh ubuntu@$EC2_IP "docker run -d -p 8080:80 --name web-app-static-site web-app-static-site:latest"
 
             # Update backup tag
             ssh ubuntu@$EC2_IP "docker tag web-app-static-site:latest web-app-static-site_backup"
