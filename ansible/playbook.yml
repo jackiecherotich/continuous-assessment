@@ -1,0 +1,86 @@
+# Part 2: Configuration Management #
+
+- name: Install  Nginx and Docker on Ubuntu
+  hosts: server_instance
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Update apt update_cache
+      apt:
+       update_cache: yes
+       cache_valid_time: 3600
+
+    - name: Install required packages for  installation
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - software-properties-common
+        state: present
+        
+
+    - name: Add Docker’s official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Update the apt cache after adding Docker repository
+      apt:
+       update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: 
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-compose-plugin
+        state: present
+
+    - name: Start Docker Service and enable on boot
+      systemd:
+       name: docker
+       state: started
+       enabled: yes   
+
+    - name: Install Nginx
+      apt:
+       name: nginx
+       state: present
+
+    - name: Start and Enable Nginx 
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes  
+
+
+    - name: Get Nginx version
+      command: nginx -v
+      register: nginx_version
+      ignore_errors: true
+
+    - name: Get Docker version
+      command: docker --version
+      register: docker_version
+      ignore_errors: true
+
+    - name: Output Docker version and Nginx Version
+      debug:
+        msg: 
+        - "Docker version: {{ docker_version.stdout | default ('Check if docker is running')}}"
+        - "Nginx Version : {{ nginx_version.stderr | default('Nginx is not installed') }}"
+    - name: Add ubuntu user to docker group
+      user:
+       name: ubuntu
+       groups: docker
+       append: yes     

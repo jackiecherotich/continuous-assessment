@@ -1,0 +1,6 @@
+services:
+  static-site:
+    build:
+      dockerfile: Dockerfile   
+    ports:
+       - 80:80
