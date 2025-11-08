@@ -26,9 +26,11 @@ jobs:
           name: Extract EC2 IP
           command: |
             EC2_IP=$(terraform output -raw web_instance_elastic_ip)
-            EC2_IP=$(echo "$EC2_IP" | tr -d '"\n')
+            EC2_IP=$(echo "$EC2_IP" | tr -d '"')
+            echo "Obtained IP: $EC2_IP"   
             # Save to file
             echo "$EC2_IP" > ec2_ip.txt
+
 
   
       # Step 2: Deploy Web  Container
@@ -36,6 +38,7 @@ jobs:
           name: Deploy Web  Container
           command: |
             EC2_IP=$(cat ec2_ip.txt)
+            
     
             # Ensure app folder exists
             ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/web-app"
