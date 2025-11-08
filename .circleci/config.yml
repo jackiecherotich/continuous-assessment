@@ -27,17 +27,18 @@ jobs:
           paths:
             - terraform/terraform.tfstate
             - terraform/.terraform
-      # Extract EC2 IP from inventory.ini
+
+      # Extract EC2 IP from terraform output
       
       - run:
           name: Extract EC2 IP
           command: |
             cd terraform          
-            EC2_IP=$(terraform output -raw web_instance_elastic_ip)
-            EC2_IP=$(echo "$EC2_IP" | tr -d '"')
-            echo "Obtained IP: $EC2_IP"   
-            # Save to file
-            echo "$EC2_IP" > ec2_ip.txt
+            _instance_ip=$(terraform output -raw web_instance_elastic_ip)
+            instance_ip=$(echo "$instance_ip" | tr -d '"')
+           
+            # # Save to file
+            # echo "$instance_ip" > ec2_ip.txt
 
 
   
@@ -45,17 +46,17 @@ jobs:
       - run:
           name: Deploy Web  Container
           command: |
-            EC2_IP=$(cat ec2_ip.txt)
-            echo "Obtained IP: $EC2_IP" 
+            instance_ip=$(cat ec2_ip.txt)
+            echo "Obtained IP: $instance_ip " 
     
             # Ensure app folder exists
-            ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/web-app"
+            ssh -o StrictHostKeyChecking=no ubuntu@$instance_ip "mkdir -p ~/web-app"
 
             # Copy web-app folder from CircleCI to EC2
-            scp -r web-app/* ubuntu@$EC2_IP:~/web-app/
+            scp -r web-app/* ubuntu@$instance_ip:~/web-app/
 
             # Stop and remove existing container if running
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               if [ \$(docker ps -q -f name=web-app-static-site) ]; then
                 echo 'Stopping existing container...'
                 docker rm -f web-app-static-site
@@ -63,19 +64,19 @@ jobs:
             "
 
             # Backup existing image if any
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               docker images | grep web-app-static-site_backup || \
               docker tag web-app-static-site:latest web-app-static-site_backup || true
             "
 
             # Build new Docker image
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               cd ~/web-app
               docker build -t web-app-static-site:latest . || echo BUILD_FAILED > /tmp/build_status
             "
 
             # Rollback if build failed
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               if [ -f /tmp/build_status ]; then
                 echo 'Build failed — rolling back...'
                 docker run -d -p 8080:80 --name web-app-static-site_rollback web-app-static-site_backup
@@ -85,12 +86,12 @@ jobs:
             "
 
             # Run new container
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               docker run -d -p 443:80 --name web-app-static-site web-app-static-site:latest
             "
 
             # Update backup tag
-            ssh ubuntu@$EC2_IP "
+            ssh ubuntu@$instance_ip "
               docker tag web-app-static-site:latest web-app-static-site_backup
             "
 
