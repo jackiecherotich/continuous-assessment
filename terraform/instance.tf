@@ -16,7 +16,7 @@ resource "aws_instance" "server_instance" {
   key_name               = aws_key_pair.ssh_key.key_name
   #count                  = var.instance_count
 
-  tags = { Name = "webserver-instance-1" }
+  tags = { Name = "webserver-instance" }
 }
 
 # Allocate Elastic IP and attach to each EC2 instance
@@ -24,7 +24,7 @@ resource "aws_eip" "server_eip" {
   instance = aws_instance.server_instance.id
        
 
-  tags = { Name = "webserver-elastic-ip-1" }
+  tags = { Name = "webserver-elastic-ip" }
 }
 
 # # Generate Ansible inventory 
