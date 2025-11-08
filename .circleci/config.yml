@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  deploy:
+  terraform:
     docker:
       - image: hashicorp/terraform:latest  # Terraform executor
     steps:
@@ -33,73 +33,49 @@ jobs:
       - run:
           name: Extract EC2 IP
           command: |
-            cd terraform          
+            cd ~/project/terraform          
             _instance_ip=$(terraform output -raw web_instance_elastic_ip)
             instance_ip=$(echo "$instance_ip" | tr -d '"')
            
-            # # Save to file
-            # echo "$instance_ip" > ec2_ip.txt
+            # Save to file
+            # echo "$instance_ip" > ~/ec2_ip.txt
 
+      - persist_to_workspace:
+         root: ~/
+         paths:
+            - ec2_ip.txt
 
-  
-      #  Deploy Web  Container
-      - run:
-          name: Deploy Web  Container
-          command: |
-            instance_ip=$(cat ec2_ip.txt)
-            echo "Obtained IP: $instance_ip " 
-    
-            # Ensure app folder exists
-            ssh -o StrictHostKeyChecking=no ubuntu@$instance_ip "mkdir -p ~/web-app"
-
-            # Copy web-app folder from CircleCI to EC2
-            scp -r web-app/* ubuntu@$instance_ip:~/web-app/
-
-            # Stop and remove existing container if running
-            ssh ubuntu@$instance_ip "
-              if [ \$(docker ps -q -f name=web-app-static-site) ]; then
-                echo 'Stopping existing container...'
-                docker rm -f web-app-static-site
-              fi
-            "
-
-            # Backup existing image if any
-            ssh ubuntu@$instance_ip "
-              docker images | grep web-app-static-site_backup || \
-              docker tag web-app-static-site:latest web-app-static-site_backup || true
-            "
-
-            # Build new Docker image
-            ssh ubuntu@$instance_ip "
-              cd ~/web-app
-              docker build -t web-app-static-site:latest . || echo BUILD_FAILED > /tmp/build_status
-            "
-
-            # Rollback if build failed
-            ssh ubuntu@$instance_ip "
-              if [ -f /tmp/build_status ]; then
-                echo 'Build failed — rolling back...'
-                docker run -d -p 8080:80 --name web-app-static-site_rollback web-app-static-site_backup
-                rm /tmp/build_status
-                exit 1
-              fi
-            "
-
-            # Run new container
-            ssh ubuntu@$instance_ip "
-              docker run -d -p 443:80 --name web-app-static-site web-app-static-site:latest
-            "
-
-            # Update backup tag
-            ssh ubuntu@$instance_ip "
-              docker tag web-app-static-site:latest web-app-static-site_backup
-            "
+ansible:
+  docker:
+    - image: cimg/base:stable
+  steps:
+     - checkout
+     - setup_remote_docker
+     - attach_workspace:
+        at: ~/     
+     - run:
+         name: Install Ansible
+         command: sudo apt-get update &&  sudo apt-get install -y ansible
+     - run:
+         name: Run Ansible Playbook
+         command: |
+           ansible-playbook ../ansible/playbook.yml -i "$(cat ~/ec2_ip.txt)," --extra-vars "ansible_user=ubuntu"
 
 workflows:
   deploy_on_push:
     jobs:
-      - deploy:
-          filters:
-            branches:
-              only:
-                - main
+      - terraform
+      - ansible:
+          requires:
+            - terraform
+filters:
+branches:
+      only:
+        - main
+
+
+
+  
+     
+
+            
