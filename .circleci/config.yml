@@ -39,7 +39,10 @@ jobs:
            
             # Save to file
             # echo "$instance_ip" > ~/ec2_ip.txt
-
+      - run:
+          name: Debug - List files
+          command: |
+           ls -la ~/
       - persist_to_workspace:
          root: ~/
          paths:
