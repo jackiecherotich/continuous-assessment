@@ -13,12 +13,15 @@ jobs:
             - SHA256:7pNFQEQEcmBCtf7scKhJJt3L9ELoL4VrXyOziI3GqK0
 
       # Step 1: Extract EC2 IP from inventory.ini
+      
       - run:
           name: Extract EC2 IP
           command: |
-            EC2_IP=$(awk '/^[0-9]/{print $1; exit}' ansible/inventory.ini)
+            EC2_IP=$(ansible server_instance -i ansible/inventory.ini --list-hosts | awk 'NR>1 {print $1; exit}')
+            # Save to file
             echo "$EC2_IP" > ec2_ip.txt
 
+  
       # Step 2: Deploy Web App Container
       - run:
           name: Deploy Web App Container
