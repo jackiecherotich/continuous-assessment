@@ -17,7 +17,7 @@ jobs:
       - run:
           name: Extract EC2 IP
           command: |
-            EC2_IP=$(ansible server_instance -i ansible/inventory.ini --list-hosts | awk 'NR>1 {print $1; exit}')
+            EC2_IP=$(ansible server_instance -i ansible/inventory.ini --list-hosts | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n1)
             # Save to file
             echo "$EC2_IP" > ec2_ip.txt
 
