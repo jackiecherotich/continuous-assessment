@@ -1,11 +1,23 @@
 #SSH Key pair #
-resource "aws_key_pair" "ssh_key" {
-  key_name   = var.key.name
-  public_key = file(var.key.path)
+# resource "aws_key_pair" "ssh_key" {
+#   key_name   = var.key.name
+#   public_key = file(var.key.path)
 
-   lifecycle {
-    create_before_destroy = true
-  }
+#    lifecycle {
+#     create_before_destroy = true
+#   }
+# }
+
+# Generate SSH key dynamically
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# Create AWS key pair using the generated public key
+resource "aws_key_pair" "ssh_key" {
+  key_name   = var.key_name
+  public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
 

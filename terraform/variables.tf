@@ -28,15 +28,20 @@ variable "ami_id" {
 variable "instance_type" {
   default = "t3.micro"
 }
+
+
+variable "key_name" {
+  default = "ec2-instance-key"  
+}
 #-------------------------
 # Key pair name for SSH access to EC2 instance #
-variable "key" {
-  default = {
-    name = "ec2-instance-key"
-    path = "/home/precious/ssh-keys/ec2-instance-key.pub"
-  }
-}
-#--------------
+# variable "key" {
+#   default = {
+#     name = "ec2-instance-key"
+#     path = "/home/precious/ssh-keys/ec2-instance-key.pub"
+#   }
+# }
+# #--------------
 # To provision more than one instance #
 #variable "instance_count" {
 # default     = 1
