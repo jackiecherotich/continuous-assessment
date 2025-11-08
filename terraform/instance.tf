@@ -2,8 +2,13 @@
 # Custom VPC Provisioning #
 resource "aws_vpc" "ca_vpc" {
   cidr_block       =  var.vpc_cidr
+
   tags = {
     Name = "custom-vpc"
+
+  }
+  lifecycle {
+    prevent_destroy = true
   }
 }
 # EC2 Instance under Custom VPC
@@ -28,7 +33,10 @@ resource "aws_eip" "server_eip" {
 }
 
 # # Generate Ansible inventory 
-resource "local_file" "inventory" {
+resource "local_file" "ansible_inventory" {
+  content = templatefile("${path.module}/ansible/inventory.tpl", {
+    instance_ip = aws_eip.server_eip.public_ip
+    key_path = "/home/precious/ssh-keys/ec2-instance-key.pem"
+  })
   filename = "../ansible/inventory.ini"
-  content = "[server_instance]\n${aws_eip.server_eip.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=/home/precious/ssh-keys/ec2-instance-key.pem\n"
 }   
