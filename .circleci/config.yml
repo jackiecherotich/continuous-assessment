@@ -44,11 +44,11 @@ jobs:
           name: Debug - List files
           command: |
            ls -la ~/
-      - persist_to_workspace:
-         root: ~/
-         paths:
-            - ec2_ip.txt
-      - attach_workspace:
+      # - persist_to_workspace:
+      #    root: ~/
+      #    paths:
+      #       - ec2_ip.txt
+          attach_workspace:
           at: ~/project
   ansible:
     docker:
