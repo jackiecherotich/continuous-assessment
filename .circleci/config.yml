@@ -6,21 +6,28 @@ jobs:
       - image: hashicorp/terraform:latest  # Terraform executor
     steps:
       - checkout
-
+      - attach_workspace:
+          at: ~/
       # Add SSH keys stored in CircleCI project
       - add_ssh_keys:
           fingerprints:
             - SHA256:7pNFQEQEcmBCtf7scKhJJt3L9ELoL4VrXyOziI3GqK0
 
 
-      #Step 0 : Terraform init, plan and apply
+      #Terraform init, plan and apply
       - run:
           name: Terraform plan and apply
           command: |
             cd terraform/
             terraform init
             terraform plan -out=tfplan && terraform apply -auto-approve  tfplan 
-      # Step 1: Extract EC2 IP from inventory.ini
+      #To Save the Previous state of the terraform apply output
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/terraform.tfstate
+            - project/.terraform
+      # Extract EC2 IP from inventory.ini
       
       - run:
           name: Extract EC2 IP
@@ -33,12 +40,12 @@ jobs:
 
 
   
-      # Step 2: Deploy Web  Container
+      #  Deploy Web  Container
       - run:
           name: Deploy Web  Container
           command: |
             EC2_IP=$(cat ec2_ip.txt)
-            
+            echo "Obtained IP: $EC2_IP" 
     
             # Ensure app folder exists
             ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP "mkdir -p ~/web-app"
