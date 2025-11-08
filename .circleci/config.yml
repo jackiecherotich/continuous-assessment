@@ -23,7 +23,7 @@ jobs:
             terraform plan -out=tfplan && terraform apply -auto-approve  tfplan 
       #To Save the Previous state of the terraform apply output
       - persist_to_workspace:
-          root: ~/
+          root: ~/project
           paths:
             - terraform/terraform.tfstate
             - terraform/.terraform
