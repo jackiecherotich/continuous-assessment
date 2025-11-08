@@ -41,7 +41,7 @@ jobs:
             # echo "$instance_ip" > ~/ec2_ip.txt
 
       - persist_to_workspace:
-         root: ~/
+         root: ~/project/terraform
          paths:
             - ec2_ip.txt
 
