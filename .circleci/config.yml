@@ -45,10 +45,10 @@ jobs:
          paths:
             - ec2_ip.txt
 
-ansible:
-  docker:
-    - image: cimg/base:stable
-  steps:
+  ansible:
+    docker:
+     - image: cimg/base:stable
+    steps:
      - checkout
      - setup_remote_docker
      - attach_workspace:
