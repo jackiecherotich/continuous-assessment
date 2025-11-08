@@ -7,9 +7,9 @@ resource "aws_vpc" "ca_vpc" {
     Name = "custom-vpc"
 
   }
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 # EC2 Instance under Custom VPC
 
