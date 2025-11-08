@@ -27,6 +27,7 @@ jobs:
           paths:
             - terraform/terraform.tfstate
             - terraform/.terraform
+            - ansible/inventory.ini
 
       # Extract EC2 IP from terraform output
       
@@ -47,7 +48,8 @@ jobs:
          root: ~/
          paths:
             - ec2_ip.txt
-
+      - attach_workspace:
+          at: ~/project
   ansible:
     docker:
      - image: cimg/base:stable
