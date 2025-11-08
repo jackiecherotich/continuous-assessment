@@ -32,6 +32,7 @@ jobs:
       - run:
           name: Extract EC2 IP
           command: |
+            cd terraform          
             EC2_IP=$(terraform output -raw web_instance_elastic_ip)
             EC2_IP=$(echo "$EC2_IP" | tr -d '"')
             echo "Obtained IP: $EC2_IP"   
