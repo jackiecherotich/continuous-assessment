@@ -79,6 +79,7 @@
         msg: 
         - "Docker version: {{ docker_version.stdout | default ('Check if docker is running')}}"
         - "Nginx Version : {{ nginx_version.stderr | default('Nginx is not installed') }}"
+
     - name: Add ubuntu user to docker group
       user:
        name: ubuntu
@@ -127,15 +128,19 @@
       shell: docker compose down
       args:
          chdir: /home/ubuntu/web-app/
-      become_user: ubuntu
-
+      
+ 
+    - name: Prune Docker networks
+      shell: docker network prune -f
+      args:
+         chdir: /home/ubuntu/web-app/
+      
 
     - name: Build and start container
       shell: docker compose up -d --build
       args:
         chdir: /home/ubuntu/web-app/
-      become_user: ubuntu 
-      become: true   
+       
 
     - name: Checking any  running containers
       shell: docker ps
@@ -155,3 +160,4 @@
         timeout: 60
         state: started
    
+
