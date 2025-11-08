@@ -25,8 +25,8 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - project/terraform.tfstate
-            - project/.terraform
+            - terraform/terraform.tfstate
+            - terraform/.terraform
       # Extract EC2 IP from inventory.ini
       
       - run:
