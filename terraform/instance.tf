@@ -13,7 +13,7 @@ resource "aws_instance" "server_instance" {
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  key_name               = aws_key_pair.ssh_key.key_name
+  key_name               = var.key_name
   #count                  = var.instance_count
 
   tags = { Name = "webserver-instance" }
