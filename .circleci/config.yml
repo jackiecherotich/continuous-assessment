@@ -64,7 +64,7 @@ jobs:
      - run:
          name: Run Ansible Playbook
          command: |
-           ansible-playbook -i ../ansible/ansible.ini ansible/playbook.yml  --extra-vars "ansible_user=ubuntu"
+           ansible-playbook -i /home/circleci/ansible/ansible.ini ansible/playbook.yml  --extra-vars "ansible_user=ubuntu"
 
 workflows:
   deploy_on_push:
