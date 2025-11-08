@@ -62,7 +62,7 @@ jobs:
      - run:
          name: Run Ansible Playbook
          command: |
-           ansible-playbook ../ansible/playbook.yml -i "$(cat ~/ec2_ip.txt)," --extra-vars "ansible_user=ubuntu"
+           ansible-playbook ansible/playbook.yml -i "$(cat ~/ec2_ip.txt)," --extra-vars "ansible_user=ubuntu"
 
 workflows:
   deploy_on_push:
