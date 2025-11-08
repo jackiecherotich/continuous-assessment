@@ -29,17 +29,17 @@ jobs:
             - terraform/.terraform
             - ansible/inventory.ini
 
-      # Extract EC2 IP from terraform output
+      # # Extract EC2 IP from terraform output
       
-      - run:
-          name: Extract EC2 IP
-          command: |
-            cd ~/project/terraform          
-            _instance_ip=$(terraform output -raw web_instance_elastic_ip)
-            instance_ip=$(echo "$instance_ip" | tr -d '"')
+      # - run:
+      #     name: Extract EC2 IP
+      #     command: |
+      #       cd ~/project/terraform          
+      #       _instance_ip=$(terraform output -raw web_instance_elastic_ip)
+      #       instance_ip=$(echo "$instance_ip" | tr -d '"')
            
-            # Save to file
-            echo "$instance_ip" > ~/ec2_ip.txt
+      #       # Save to file
+      #       echo "$instance_ip" > ~/ec2_ip.txt
       - run:
           name: Debug - List files
           command: |
@@ -64,7 +64,7 @@ jobs:
      - run:
          name: Run Ansible Playbook
          command: |
-           ansible-playbook -i ansible/ansible.ini playbook.yml 
+           ansible-playbook -i /home/circleci/project/ansible/ansible.ini ansible/playbook.yml 
 
 workflows:
   deploy_on_push:
