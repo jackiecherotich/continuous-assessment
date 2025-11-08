@@ -6,17 +6,17 @@ variable "region" {
 #---------------
 # VPC CIDR block network range for the VPC #
 variable "vpc_cidr" {
-  default = "10.0.0.0/24"
+  default = "10.0.0.0/27"
 }
 #-----------------
 # Public Subnet CIDR within the VPC CIDR range
 variable "public_subnet_cidr" {
-  default = "10.0.0.0/25"
+  default = "10.0.0.0/28"
 }
 #-----------------
 #Private Subnet for private servers like Database#
 variable "private_subnet_cidr" {
-  default = "10.0.0.128/25"
+  default = "10.0.0.16/28"
 }
 #-----------------
 #Amazon Machine Image  ID for the EC2 instance#
