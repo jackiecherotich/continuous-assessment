@@ -38,10 +38,10 @@ jobs:
             instance_ip=$(echo "$instance_ip" | tr -d '"')
            
             # Save to file
-            # echo "$instance_ip" > ~/project/ec2_ip.txt
+            # echo "$instance_ip" > ~/ec2_ip.txt
 
       - persist_to_workspace:
-         root: ~/project
+         root: ~/
          paths:
             - ec2_ip.txt
 
