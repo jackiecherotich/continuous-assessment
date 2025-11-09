@@ -53,6 +53,12 @@ jobs:
           name: Check Inventory
           command: cat ~/project/ansible/inventory.ini
      - run:
+         name: Fix SSH Key Path for CircleCI
+         command: |
+           sed -i 's|/home/precious/ssh-keys/ec2-instance-key.pem|/home/circleci/project/ssh-keys/ec2-instance-key.pem|' ~/project/ansible/inventory.ini
+
+     
+     - run:
          name: Run Ansible Playbook
          command: |
            ansible-playbook -i ~/project/ansible/ansible.ini ansible/playbook.yml 
