@@ -29,27 +29,13 @@ jobs:
             - terraform/.terraform
             - ansible/inventory.ini
 
-      # # Extract EC2 IP from terraform output
-      
-      # - run:
-      #     name: Extract EC2 IP
-      #     command: |
-      #       cd ~/project/terraform          
-      #       _instance_ip=$(terraform output -raw web_instance_elastic_ip)
-      #       instance_ip=$(echo "$instance_ip" | tr -d '"')
-           
-      #       # Save to file
-      #       echo "$instance_ip" > ~/ec2_ip.txt
       - run:
           name: Debug - List files
           command: |
            ls -la ~/
-      # - persist_to_workspace:
-      #    root: ~/
-      #    paths:
-      #       - ec2_ip.txt
-          attach_workspace:
-          at: ~/project
+      #
+          # attach_workspace:
+          # at: ~/project
   ansible:
     docker:
      - image: cimg/base:stable
@@ -57,14 +43,19 @@ jobs:
      - checkout
      - setup_remote_docker
      - attach_workspace:
-        at: ~/     
+        at: ~/project     
      - run:
          name: Install Ansible
          command: sudo apt-get update &&  sudo apt-get install -y ansible
+    
+    # Verify inventory exists
+     - run:
+          name: Check Inventory
+          command: cat ~/project/ansible/inventory.ini
      - run:
          name: Run Ansible Playbook
          command: |
-           ansible-playbook -i /home/circleci/project/ansible/ansible.ini ansible/playbook.yml 
+           ansible-playbook -i ~/project/ansible/ansible.ini ansible/playbook.yml 
 
 workflows:
   deploy_on_push:
