@@ -61,7 +61,7 @@ jobs:
      - run:
          name: Run Ansible Playbook
          command: |
-           ansible-playbook -i ~/project/ansible/inventory.ini ansible/playbook.yml 
+           ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ~/project/ansible/inventory.ini ansible/playbook.yml 
 
 workflows:
   deploy_on_push:
